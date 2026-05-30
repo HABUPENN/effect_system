@@ -1,11 +1,11 @@
 {
-	"format_version": 2,
+	"format_version": 3,
 	"header": {
 		"name": "effect_system",
 		"description": "effect_system Behavior Pack",
 		"uuid": "a7ad67ce-a614-4c37-9c3d-b8f9ccd6a0a7",
-		"version": [1, 0, 4],
-		"min_engine_version": [1, 21, 120]
+		"version": "1.0.4",
+		"min_engine_version": "1.21.120"
 	},
 	"metadata": {
 		"authors": ["HABUPENN"],
@@ -15,7 +15,7 @@
 	"modules": [
 		{
 			"description": "Script",
-			"version": [1, 0, 0],
+			"version": "1.0.0",
 			"uuid": "f6eb005f-3cfa-4d11-aee6-2be8ec1db94e",
 			"type": "script",
 			"language": "javascript",
