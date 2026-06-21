@@ -13,7 +13,27 @@ Effect System は追加されたエフェクトを全て確認できるため、
 
     (base全ての和)*(add全ての和 +1)*(mul全ての積)
 
+## 追加コマンド
+`effect_system:`から始まる4つのコマンド。省略して記載。
+### effectgui
+エフェクトの状況をGUIで表示するコマンド
+### effectlist
+今ついているエフェクトを一覧で確認するコマンド
+### effectinfo
+エフェクトを指定して状態を確認するコマンド
+### effectset (チート)
+エフェクトをエフェクトシステムの方法で付与するコマンド
+
 ## ScriptEventAPI
+### 表示,非表示の切り替え
+Effect System ではコマンドで確認できないエフェクトを登録するシステムがあります。  
+プレーヤーに確認されたくない効果がある場合活用しましょう。  
+登録と解除は、ScriptEventを送信して行います。
+#### Event ID
+`effect_system:hide_effect`,`effect_system:show_effect`
+#### Message Structure(String)
+例:`jump_boost`
+
 ### 値の設定
 Effect System ではレイヤー内に、IDで管理された時間と強度を保持しています。  
 各アドオンは、IDを使用しエフェクトの状態を変更できます。  
@@ -138,6 +158,23 @@ getEffect(entity: @minecraft/server.entity, effect: string)
 - effect  
 確認する効果のID バニラ効果も可能
 
+### hideEffect
+エフェクトシステムのコマンドで確認できないエフェクトを登録する関数
+```js
+hideEffect(effect: string)
+```
+
+- effect  
+効果の指定
+
+### showEffect
+エフェクトシステムのコマンドで確認できないエフェクトを登録解除する関数
+```js
+showEffect(effect: string)
+```
+
+- effect  
+効果の指定
 
 ## ライセンス
 
