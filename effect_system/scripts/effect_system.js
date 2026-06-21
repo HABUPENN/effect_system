@@ -178,6 +178,7 @@ world.afterEvents.playerSpawn.subscribe(({ player }) => {
         ["base", "add", "mul"].forEach(type => {
             Object.keys(power[type]).forEach(id => {
                 if (power[type][id].runId) {
+                    system.clearRun(power[type][id].runId);
                     console.log(JSON.stringify(power[type][id]),addTime,serverStart)
                     power[type][id].end+=addTime;//delete power[type][id];
                     power[type][id].runId = system.runTimeout(() => {
