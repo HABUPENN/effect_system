@@ -77,6 +77,29 @@ export function setEffect(entity, id, type, effect, power, name, time = null) {
         })
     );
 }
+
+/**
+ * エフェクトシステムで表示しない効果を登録する。
+ * @param {string} effect
+ * 表示しないようにするeffect ID
+ */
+export function hideEffect(effect) {
+    system.sendScriptEvent(
+        "effect_system:hide_effect",effect
+    );
+}
+
+/**
+ * エフェクトシステムで表示しない効果を登録解除する。
+ * @param {string} effect
+ * 表示するようにするeffect ID
+ */
+export function showEffect(effect) {
+    system.sendScriptEvent(
+        "effect_system:show_effect",effect
+    );
+}
+
 /**
  * effect_system から同期されたエフェクト状態キャッシュ。
  * 

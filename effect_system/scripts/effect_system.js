@@ -1,8 +1,11 @@
 import { system, world } from "@minecraft/server"
 import { ActionFormData } from "@minecraft/server-ui"
 
+let hideEffect=new Set();
+let serverStart=0;
 // 状態確認用コマンドの実装
 system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
+    serverStart=system.currentTick;
     customCommandRegistry.registerCommand({
         cheatsRequired: false,
         name: "effect_system:effectlist",
@@ -12,7 +15,7 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
         system.run(() => {
             if (sourceEntity) {
                 let effectList = JSON.parse(sourceEntity.getDynamicProperty("effect_list") || "[]");
-                sourceEntity.sendMessage(effectList.join("\n"));
+                sourceEntity.sendMessage(effectList.filter(e=>!hideEffect.has(e)).join("\n"));
             }
         })
     })
@@ -79,7 +82,7 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
 function showEffectUI(entity, main) {
     let effectList = JSON.parse(entity.getDynamicProperty("effect_list") || "[]");
     let form = new ActionFormData().body(main);
-    effectList.forEach(e => {
+    effectList.filter(e=>!hideEffect.has(e)).forEach(e => {
         let power = JSON.parse(entity.getDynamicProperty(e) || '{"base":{},"add":{},"mul":{}}');
         let name = formatName(e);
         form = form.button({
@@ -112,8 +115,9 @@ const effectName2translate = {
 function formatName(e) {
     let name = e;
     if (e.startsWith("minecraft:")) name = e.slice(10);
-    name = toCamelCase(name);
+    console.log(name)
     if (effectName2translate[name]) name = effectName2translate[name];
+    name = toCamelCase(name);
     return name;
 }
 
@@ -166,13 +170,27 @@ function pad(n) {
 
 // プレーヤー参加時とリスポーン時に時間制限付き効果を削除
 world.afterEvents.playerSpawn.subscribe(({ player }) => {
+    let ct=system.currentTick;
+    let addTime=ct-(world.getDynamicProperty(player.name)||serverStart);
     let effectList = JSON.parse(player.getDynamicProperty("effect_list") || "[]");
     effectList.forEach(e => {
         let power = JSON.parse(player.getDynamicProperty(e));
         ["base", "add", "mul"].forEach(type => {
             Object.keys(power[type]).forEach(id => {
                 if (power[type][id].runId) {
-                    delete power[type][id];
+                    console.log(JSON.stringify(power[type][id]),addTime,serverStart)
+                    power[type][id].end+=addTime;//delete power[type][id];
+                    power[type][id].runId = system.runTimeout(() => {
+                        if (!player||!player.isValid) return;
+                        let power = JSON.parse(player.getDynamicProperty(e));
+                        delete power[type][id];
+                        if (0 != Object.keys(power.base).length + Object.keys(power.add).length + Object.keys(power.mul).length) {
+                            player.setDynamicProperty(e, JSON.stringify(power));
+                        } else {
+                            player.setDynamicProperty(e);
+                        }
+                        addEffect(player, e, calcEffect(power));
+                    }, power[type][id].end-system.currentTick)
                 }
             });
         });
@@ -182,6 +200,12 @@ world.afterEvents.playerSpawn.subscribe(({ player }) => {
             JSON.stringify(power)
         );
     })
+})
+
+// プレーヤー参加時とリスポーン時に時間制限付き効果を削除
+world.beforeEvents.playerLeave.subscribe(({ player }) => {
+    world.setDynamicProperty(player.name,system.currentTick);
+    console.log("set",system.currentTick)
 })
 
 // バニラのエフェクトを可能な限り再現
@@ -203,6 +227,14 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message }) => {
         let json = JSON.parse(message);
         let player = world.getEntity(json.target);
         setEffect(player, json);
+    } else
+    if (id == "effect_system:hide_effect") {
+        if(!message.includes(":"))hideEffect.add("minecraft:"+message);
+        else hideEffect.add(message);
+    } else
+    if (id == "effect_system:show_effect") {
+        if(!message.includes(":"))hideEffect.delete("minecraft:"+message);
+        else hideEffect.delete(message);
     }
 }, { namespaces: ["effect_system"] });
 
