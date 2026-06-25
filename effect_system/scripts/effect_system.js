@@ -88,7 +88,7 @@ function showEffectUI(entity, main) {
         form = form.button({
             rawtext: [
                 { translate: `potion.${name}` },
-                { text: `: ${calcEffect(power)}\n` }
+                { text: `: ${+calcEffect(power).toFixed(5)}\n` }
             ]
         }, `textures/ui/${e.replace("minecraft:", "").replace(":", "/")}_effect`)
     })
@@ -124,11 +124,11 @@ function formatName(e) {
 // 確認用文字列の整形
 function formatEffect(power, name) {
     let fName = formatName(name);
-    let lines = [{ translate: `potion.${fName}` }, { text: `: ${calcEffect(power)}\n` }];
-    [["base", "+", "", 1, "§a[BASE]"], ["add", "+", "％", 100, "§6[SCALE]"], ["mul", "x", "％", 100, "§d[MULTIPLIER]"]].forEach(type => {
+    let lines = [{ translate: `potion.${fName}` }, { text: `: ${+calcEffect(power).toFixed(5)}\n` }];
+    [["base", "+-", "", 1, "§a[BASE]"], ["add", "+-", "％", 100, "§6[SCALE]"], ["mul", "xx", "％", 100, "§d[MULTIPLIER]"]].forEach(type => {
         lines.push({ text: type[4] });
         Object.keys(power[type[0]]).forEach(id => {
-            lines.push({ text: "\n [" + type[1] + (power[type[0]][id].power * type[3]) + type[2] + "] " });
+            lines.push({ text: "\n [" + type[1][power[type[0]][id].power<0?1:0] + (+Math.abs(power[type[0]][id].power * type[3]).toFixed(5)) + type[2] + "] " });
             lines.push({ translate: power[type[0]][id].name });
             if (power[type[0]][id].end) lines.push({ text: ` (${formatTime(power[type[0]][id].end - system.currentTick)})` });
         });
@@ -287,7 +287,7 @@ function setEffect(player, json) {
 let seq = 0;
 function addEffect(player, effect, amp) {
     let effectList = JSON.parse(player.getDynamicProperty("effect_list") || "[]");
-    if (0 < amp) {
+    if (0 != amp) {
         if (!effectList.includes(effect)) effectList.push(effect);
     } else {
         effectList = effectList.filter(e => e !== effect);
