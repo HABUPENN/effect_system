@@ -130,8 +130,14 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message }) => {
         if (!Effects[json.target]) Effects[json.target] = {};
         if (!Effects[json.target][json.effect]) Effects[json.target][json.effect] = { amp: 0, seq: -1 };
         if (Effects[json.target][json.effect].seq < json.seq) {
+            const changed=Effects[json.target][json.effect].amp!=json.amp;
             Effects[json.target][json.effect].amp = json.amp;
             Effects[json.target][json.effect].seq = json.seq;
+            if(changed){
+                changeEffectEventRegistry[json.effect].forEach(f => {
+                    f(json.target,json.amp);
+                });
+            }
         }
     }
 }, { namespaces: ["effect_system"] });
@@ -159,4 +165,17 @@ export function getEffect(entity, effect) {
     }
 
     return Effects[entity.id]?.[effect]?.amp ?? 0;
+}
+
+const changeEffectEventRegistry={};
+
+export const changeEffectEvent={
+    subscribe:(id,callback)=>{
+        if(changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
+        changeEffectEventRegistry[id].add(callback);
+    },
+    unsubscribe:(id,callback)=>{
+        if(changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
+        changeEffectEventRegistry[id].delete(callback);
+    }
 }
