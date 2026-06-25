@@ -171,11 +171,11 @@ const changeEffectEventRegistry={};
 
 export const changeEffectEvent={
     subscribe:(id,callback)=>{
-        if(changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
+        if(!changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
         changeEffectEventRegistry[id].add(callback);
     },
     unsubscribe:(id,callback)=>{
-        if(changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
+        if(!changeEffectEventRegistry[id])changeEffectEventRegistry[id]=new Set();
         changeEffectEventRegistry[id].delete(callback);
     }
 }
