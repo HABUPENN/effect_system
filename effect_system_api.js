@@ -133,7 +133,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message }) => {
             const changed=Effects[json.target][json.effect].amp!=json.amp;
             Effects[json.target][json.effect].amp = json.amp;
             Effects[json.target][json.effect].seq = json.seq;
-            if(changed){
+            if(changed&&changeEffectEventRegistry[json.effect]){
                 changeEffectEventRegistry[json.effect].forEach(f => {
                     f(json.target,json.amp);
                 });
